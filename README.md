@@ -29,3 +29,8 @@ bpsendfile command executed for request_test: Stopping bpsendfile.」と出る�
 [1/2/2024, 4:33:35 PM] bpsendfile output: Stopping bpsendfile.  
 一行目はbprecvfileに成功したこと、2行目はHTTPリクエストに成功しファイルにレスポンスを書き込んだこと、3行目は「response_」から始まる名前のファイルが/nodejsディレクトリに検知されたこと、4行目は（forward_nodejsに対する）bpsendfileが成功したことを示す。
 1. 実行方法5をやると、testfile1がゲットできる。
+
+
+##　新実装
+1. Webserver でproxyコントロールするためのpromiseを実装。startProxyServerは、プロキシサーバーを起動するための関数。startProxyServerはPromiseを返し、proxy.listenを使用して指定されたポート（8080）でサーバーを起動。
+//サーバーが正常に起動した場合、Promiseは解決されます。エラーが発生した場合、Promiseはそのエラーで拒否されます。
