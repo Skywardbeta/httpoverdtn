@@ -1,0 +1,136 @@
+version: '3'
+
+networks:
+  network1:
+    ipam:
+      config:
+      - subnet: 192.168.0.0/24
+  network2:
+    ipam:
+      config:
+      - subnet: 192.168.1.0/24
+  network3:
+    ipam:
+      config:
+      - subnet: 192.168.2.0/24
+  network4:
+    ipam:
+      config:
+      - subnet: 192.168.3.0/24
+  network5:
+    ipam:
+      config:
+      - subnet: 192.168.4.0/24
+
+services:
+
+  web_browser:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile2
+    container_name: web_browser
+    volumes:
+      - ./input/networks/web_browser.sh/:/container_networks.sh
+
+    networks:
+      network1:
+        ipv4_address: 192.168.0.2
+    ports:
+    - 50001:5001
+    privileged: true
+    tty: true
+
+  forward_proxy:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile2
+    container_name: forward_proxy
+    volumes:
+      - ./input/nginx/nginx_forward.conf/:/etc/nginx/nginx.conf
+      - ./input/networks/forward_proxy.sh/:/container_networks.sh
+      - ./input/nodejs/forward_proxy.js:/forward_proxy.js
+ 
+    networks:
+      network1:
+        ipv4_address: 192.168.0.3
+      network2:
+        ipv4_address: 192.168.1.2
+    ports:
+    - 50002:5001
+    privileged: true
+    tty: true
+
+  forward_nodejs:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile1
+    container_name: forward_nodejs
+    volumes:
+      - ./input/nodejs/forward_nodejs.js:/forward_nodejs.js
+      - ./input/ion_host/host149.rc:/ion-open-source-4.1.2/host149.rc
+      - ./input/networks/forward_nodejs.sh/:/container_networks.sh
+    networks:
+      network2:
+        ipv4_address: 192.168.1.3
+      network3:
+        ipv4_address: 192.168.2.2
+    ports:
+    - 50003:5001
+    - "80:80"
+
+    privileged: true
+    tty: true
+
+  reverse_nodejs:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile1
+    container_name: reverse_nodejs
+    volumes:
+      - ./input/nodejs/reverse_nodejs.js:/reverse_nodejs.js
+      - ./input/ion_host/host150.rc:/ion-open-source-4.1.2/host150.rc
+      - ./input/networks/reverse_nodejs.sh/:/container_networks.sh
+    networks:
+      network3:
+        ipv4_address: 192.168.2.3
+      network4:
+        ipv4_address: 192.168.3.2
+    ports:
+    - 50004:5001
+    privileged: true
+    tty: true
+
+  reverse_proxy:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile2
+    container_name: reverse_proxy
+    volumes:
+      - ./input/networks/reverse_proxy.sh/:/container_networks.sh
+      - ./input/nginx/nginx_reverse.conf/:/etc/nginx/nginx.conf
+    networks:
+      network4:
+        ipv4_address: 192.168.3.3
+      network5:
+        ipv4_address: 192.168.4.2
+    ports:
+    - 50005:5001
+    privileged: true
+    tty: true
+
+  web_server:
+    build:
+      context: ./
+      dockerfile: ./input/dockerfile/Dockerfile2
+    container_name: web_server
+    volumes:
+      - ./input/data/dtn_data.html:/dtn/dtn_data.html
+      - ./input/networks/web_server.sh/:/container_networks.sh
+      - ./input/nginx/nginx_webserver.conf:/etc/nginx/nginx.conf
+    networks:
+      network5:
+        ipv4_address: 192.168.4.3
+    ports:
+    - 50006:5001
+    privileged: true
+    tty: true
